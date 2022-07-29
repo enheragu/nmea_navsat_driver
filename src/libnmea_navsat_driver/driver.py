@@ -147,6 +147,8 @@ class RosNMEADriver(object):
                 NavSatFix.COVARIANCE_TYPE_APPROXIMATED
             ]
         }
+        
+        self.prev_type = None
 
     def add_sentence(self, nmea_string, frame_id, timestamp=None):
         """Public method to provide a new NMEA sentence to the driver.
@@ -208,9 +210,9 @@ class RosNMEADriver(object):
             fix_type_tostr = {-1: "Unknown", 0: "Invalid", 1: "SPS", 2: "DGPS", 4: "RTK Fix", 5: "RTK Float", 9: "WAAS"}
             # Print colors red, yellow, green and cyan
             fix_type_color  = {-1: '1;31', 0: '1;31', 1: '1;33', 2: '1;33', 4: '1;32', 5: '1;32', 9: '1;36'}
-            if prev is None or prev != fix_type_tostr[fix_type]:
+            if self.prev_type is None or self.prev_type != fix_type_tostr[fix_type]:
                 print('\033[' + fix_type_color[fix_type] + 'm' + "[nmea_navsat_driver::RosNMEADriver] - [add_sentence] Fix type is now: " + fix_type_tostr[fix_type] + '\033[0m')
-                prev = fix_type_tostr[fix_type]
+                self.prev_type = fix_type_tostr[fix_type]
 
             gps_qual = self.gps_qualities[fix_type]
             default_epe = gps_qual[0]
