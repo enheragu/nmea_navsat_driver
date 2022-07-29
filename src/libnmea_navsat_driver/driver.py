@@ -204,6 +204,10 @@ class RosNMEADriver(object):
             fix_type = data['fix_type']
             if not (fix_type in self.gps_qualities):
                 fix_type = -1
+
+            fix_type_tostr = {-1: "Unknown", 0: "Invalid", 1: "SPS", 2: "DGPS", 4: "RTK Fix", 5: "RTK Float", 9: "WAAS"}
+            print("Fix type is now: " + fix_type_tostr[fix_type])
+
             gps_qual = self.gps_qualities[fix_type]
             default_epe = gps_qual[0]
             current_fix.status.status = gps_qual[1]
