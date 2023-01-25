@@ -264,6 +264,11 @@ parse_maps = {
     "VTG": [
         ("true_course", safe_float, 1),
         ("speed", convert_knots_to_mps, 5)
+    ],
+    "GSV": [
+        ("num_satellites", safe_int, 3),
+        ("elevation", safe_int, 5), #deg
+        ("azimuth", safe_int, 6) # deg 0-359 from north
     ]
 }
 """A dictionary that maps from sentence identifier string (e.g. "GGA") to a list of tuples.
