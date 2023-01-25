@@ -323,6 +323,19 @@ class RosNMEADriver(object):
                 current_vel.twist.linear.y = data['speed'] * \
                     math.cos(data['true_course'])
                 self.vel_pub.publish(current_vel)
+
+                # Publish true course as heading
+                current_heading = QuaternionStamped()
+                current_heading.header.stamp = current_time
+                current_heading.header.frame_id = frame_id
+                q = quaternion_from_euler(0, 0, data['true_course'])
+                current_heading.quaternion.x = q[0]
+                current_heading.quaternion.y = q[1]
+                current_heading.quaternion.z = q[2]
+                current_heading.quaternion.w = q[3]
+                self.heading_pub.publish(current_heading)
+                print("Heading from true course is " + str(data['true_course']) + " rad; and " + str(math.degrees(data['true_course'])) +  " deg.")
+                print("Speed is " + str(data['speed']))
         elif 'GST' in parsed_sentence:
             data = parsed_sentence['GST']
 
