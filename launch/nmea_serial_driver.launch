@@ -16,6 +16,10 @@
     <param name="use_GNSS_time" value="$(arg use_GNSS_time)" />
     <param name="time_ref_source" value="$(arg time_ref_source)" />
     <param name="useRMC" value="$(arg useRMC)" />
+    
+		<remap from = "fix" to = "gnss/fix"/>
+		<remap from = "heading" to = "gnss/heading"/>
+		<remap from = "vel" to = "gnss/vel"/>
   </node>
 
 </launch>

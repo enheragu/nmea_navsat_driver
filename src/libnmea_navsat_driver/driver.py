@@ -43,7 +43,6 @@ from tf.transformations import quaternion_from_euler
 from libnmea_navsat_driver.checksum_utils import check_nmea_checksum
 import libnmea_navsat_driver.parser
 
-
 class RosNMEADriver(object):
     """ROS driver for NMEA GNSS devices."""
 
@@ -149,6 +148,8 @@ class RosNMEADriver(object):
         }
         
         self.prev_type = None
+        self.prev_heading = None
+        self.prev_course = None
 
     def add_sentence(self, nmea_string, frame_id, timestamp=None):
         """Public method to provide a new NMEA sentence to the driver.
@@ -324,18 +325,27 @@ class RosNMEADriver(object):
                     math.cos(data['true_course'])
                 self.vel_pub.publish(current_vel)
 
-                # Publish true course as heading
-                current_heading = QuaternionStamped()
-                current_heading.header.stamp = current_time
-                current_heading.header.frame_id = frame_id
-                q = quaternion_from_euler(0, 0, data['true_course'])
-                current_heading.quaternion.x = q[0]
-                current_heading.quaternion.y = q[1]
-                current_heading.quaternion.z = q[2]
-                current_heading.quaternion.w = q[3]
-                self.heading_pub.publish(current_heading)
-                print("Heading from true course is " + str(data['true_course']) + " rad; and " + str(math.degrees(data['true_course'])) +  " deg.")
-                print("Speed is " + str(data['speed']))
+                # Publish true course as heading as its a ground
+                # only published when robot is moving. If not moving and theres
+                # previous heading, publish that instead
+                if data['speed'] > 0.05:
+                    current_heading = QuaternionStamped()
+                    current_heading.header.stamp = current_time
+                    current_heading.header.frame_id = frame_id
+                    q = quaternion_from_euler(0, 0, data['true_course'])
+                    current_heading.quaternion.x = q[0]
+                    current_heading.quaternion.y = q[1]
+                    current_heading.quaternion.z = q[2]
+                    current_heading.quaternion.w = q[3]
+
+                    self.prev_course = data['true_course']
+                    self.prev_heading = current_heading
+
+                if self.prev_heading is not None:
+                    self.heading_pub.publish(self.prev_heading)
+                    #print("Heading from true course is " + str(self.prev_course) + " rad; and " + str(math.degrees(self.prev_course)) +  " deg.")
+                    #print("Speed is " + str(data['speed']))
+
         elif 'GST' in parsed_sentence:
             data = parsed_sentence['GST']
 
@@ -391,3 +401,4 @@ class RosNMEADriver(object):
             return "%s/%s" % (prefix, frame_id)
         else:
             return frame_id
+
